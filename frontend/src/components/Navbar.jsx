@@ -96,67 +96,66 @@ export default function Navbar({ onShopTyreClick }) {
           <nav className="hidden md:flex items-center space-x-6 text-md font-medium text-gray-900">
 
             <a href="/" className={` ${currentPath === '/' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Home</a>
-            
-           <div className="relative group">
-  <a
-    href="/services"
-    className={`inline-block px-4 py-2 ${
-      currentPath === '/services'
-        ? 'text-red-600 font-semibold'
-        : 'hover:text-red-600'
-    }`}
-  >
-    Services
-  </a>
 
-  {/* Dropdown Menu */}
-  <ul className="absolute left-0 z-10 mt-2 w-64 bg-white shadow-lg rounded-md opacity-0 invisible group-hover:visible group-hover:opacity-100 transform group-hover:translate-y-1 transition-all duration-300 ease-in-out">
-    <li>
-      <a href="/services/tyre-sales" className="block px-4 py-2 hover:bg-gray-100">
-        Tyre Sales
-      </a>
-    </li>
-    <li>
-      <a href="/services/fleet" className="block px-4 py-2 hover:bg-gray-100">
-        Fleet Tyre Services
-      </a>
-    </li>
-    <li>
-      <a href="/services/onsite-fitting" className="block px-4 py-2 hover:bg-gray-100">
-        Onsite Tyre Fitting
-      </a>
-    </li>
-    <li>
-      <a href="/services/puncture-repair" className="block px-4 py-2 hover:bg-gray-100">
-        Puncture Repair
-      </a>
-    </li>
-    <li>
-      <a href="/services/rotations" className="block px-4 py-2 hover:bg-gray-100">
-        Tyre Rotations
-      </a>
-    </li>
-    <li>
-      <a href="/services/wheel-balancing" className="block px-4 py-2 hover:bg-gray-100">
-        Wheel Balancing
-      </a>
-    </li>
-    <li>
-      <a href="/services/inspections" className="block px-4 py-2 hover:bg-gray-100">
-        Tyre Inspections
-      </a>
-    </li>
-    <li>
-      <a href="/services/recycling" className="block px-4 py-2 hover:bg-gray-100">
-        Tyre Recycling
-      </a>
-    </li>
-  </ul>
-</div>
+            <div className="relative group">
+              <a
+                href="/services"
+                className={`inline-block px-4 py-2 ${currentPath === '/services'
+                    ? 'text-red-600 font-semibold'
+                    : 'hover:text-red-600'
+                  }`}
+              >
+                Services
+              </a>
 
-           <a href="/about-us" className={` ${currentPath === '/about-us' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>About us</a>
-<a href="/area-we-serve" className={` ${currentPath === '/area-we-serve' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Areas we serve</a>
-<a href="/blogs" className={` ${currentPath === '/blogs' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Blog</a>
+              {/* Dropdown Menu */}
+              <ul className="absolute left-0 z-10 mt-2 w-64 bg-white shadow-lg rounded-md opacity-0 invisible group-hover:visible group-hover:opacity-100 transform group-hover:translate-y-1 transition-all duration-300 ease-in-out">
+                <li>
+                  <a href="/services/tyre-sales" className="block px-4 py-2 hover:bg-gray-100">
+                    Tyre Sales
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/fleet" className="block px-4 py-2 hover:bg-gray-100">
+                    Fleet Tyre Services
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/onsite-fitting" className="block px-4 py-2 hover:bg-gray-100">
+                    Onsite Tyre Fitting
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/puncture-repair" className="block px-4 py-2 hover:bg-gray-100">
+                    Puncture Repair
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/rotations" className="block px-4 py-2 hover:bg-gray-100">
+                    Tyre Rotations
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/wheel-balancing" className="block px-4 py-2 hover:bg-gray-100">
+                    Wheel Balancing
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/inspections" className="block px-4 py-2 hover:bg-gray-100">
+                    Tyre Inspections
+                  </a>
+                </li>
+                <li>
+                  <a href="/services/recycling" className="block px-4 py-2 hover:bg-gray-100">
+                    Tyre Recycling
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <a href="/about-us" className={` ${currentPath === '/about-us' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>About us</a>
+            <a href="/area-we-serve" className={` ${currentPath === '/area-we-serve' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Areas we serve</a>
+            <a href="/blogs" className={` ${currentPath === '/blogs' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Blog</a>
 
 
           </nav>
@@ -174,7 +173,7 @@ export default function Navbar({ onShopTyreClick }) {
 
             {/* Cart Icon */}
             <>
-              <div className={`relative   ${currentPath === '/checkout'? "pointer-events-none opacity-50" : ""}` } onClick={() => setIsCartOpen(true)}>
+              <div className={`relative   ${currentPath === '/checkout' ? "pointer-events-none opacity-50" : ""}`} onClick={() => setIsCartOpen(true)}>
                 <FaShoppingCart size={25} className="text-gray-700 hover:cursor-pointer" />
                 {itemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
@@ -208,15 +207,16 @@ export default function Navbar({ onShopTyreClick }) {
               className="md:hidden  font-medium space-y-3 text-sm text-gray-800 px-4 py-4 rounded-b-2xl shadow-lg origin-top"
             >
               <a href="/" className={` block ${currentPath === '/' ? ' text-red-600 font-semibold' : 'hover:text-red-600'}`}>Home</a>
-              <button onClick={currentPath === '/' ? onShopTyreClick : ()=> navigate("/")} className={`block hover:text-red-600`}>Shop tyres</button>
+              <button onClick={currentPath === '/' ? onShopTyreClick : () => navigate("/")} className={`block hover:text-red-600`}>Shop tyres</button>
 
-            <a href="/services" className={`block ${currentPath === '/services' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Services</a>
-            <a href="/about-us" className={`block ${currentPath === '/about-us' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>About us</a>
+              <a href="/services" className={`block ${currentPath === '/services' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Services</a>
+              <a href="/about-us" className={`block ${currentPath === '/about-us' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>About us</a>
 
 
-              
+
               <a href="/blogs" className={`block ${currentPath === '/blogs' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Blog</a>
-              <a href="/help-center" className={` ${currentPath === '/help-center' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Help center</a>
+              <a href="/area-we-serve" className={` ${currentPath === '/area-we-serve' ? 'text-red-600 font-semibold' : 'hover:text-red-600'}`}>Areas we serve</a>
+
 
 
 
