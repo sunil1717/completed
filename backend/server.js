@@ -16,7 +16,8 @@ app.use(cors({
   origin: [
     'https://aussiemobiletyre.vercel.app',  
     'http://localhost:5173',
-    'https://aussiemobiletyre.netlify.app'
+    'https://aussiemobiletyre.netlify.app',
+    'https://completed-i8yo.vercel.app'
   ],
   credentials: true
 }));
