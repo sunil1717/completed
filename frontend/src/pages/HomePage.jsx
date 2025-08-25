@@ -276,6 +276,8 @@ export default function HomePage() {
   const handleSizeSearch = async () => {
 
     setSearching(true);
+     setstaggerfit(false);
+    
 
     setFilters(prev => ({ ...prev, width: sizeForm.width }));
     setFilters(prev => ({ ...prev, profile: sizeForm.profile }));
