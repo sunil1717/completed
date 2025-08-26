@@ -678,7 +678,7 @@ export default function AdminDashboard() {
               <div>
                 <label className="text-sm font-medium text-gray-700">Unloading in 24 Hrs</label>
                 <input
-                  type="number"
+                  type="text"
                   value={newTyre["UNLOADING IN 24 HRS"]}
                   onChange={(e) =>
                     setNewTyre((prev) => ({
