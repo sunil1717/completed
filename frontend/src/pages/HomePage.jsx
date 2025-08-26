@@ -472,17 +472,18 @@ export default function HomePage() {
         <h4 className="text-md font-bold text-gray-800 mb-1 text-center">
           {tyre.Model}
         </h4>
-        <p className="text-sm text-gray-600 text-center mb-2">
-          {width}/{profile}R{rimSize} ({tyre["LOAD/SPEED RATING"]})
-        </p>
-
-        {tyre.Marking && tyre.Marking !== "NaN"  && (
-          <div className="flex items-center justify-center">
-          <span className="text-sm text-gray-600 text-center mb-4">
-            ( {tyre.Marking} )
+        <p className="text-sm text-gray-600 text-center mb-4 flex flex-row justify-center items-center ">
+          <span> {width}/{profile}R{rimSize} ({tyre["LOAD/SPEED RATING"]})</span>   
+           {tyre.Marking && tyre.Marking !== "NaN"  && (
+          <div className="flex items-center justify-center ml-2">
+          <span className="text-sm text-gray-600 text-center ">
+             {tyre.Marking} 
           </span>
           </div>
         )}
+        </p>
+
+       
 
         {
           tyre.RunFlat === "YES" &&

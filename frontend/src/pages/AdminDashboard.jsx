@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef,useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAdminStore } from '../store/adminStore';
 import { useShopStore } from '../store/shopStore'
 import { FaTrash } from "react-icons/fa";
@@ -15,9 +15,9 @@ export default function AdminDashboard() {
 
 
   const {
-    tyres = [],
+
     serviceAreas = [],
-    bookings = [],
+
     fetchTyres,
     deleteTyre,
     updateTyreImage,
@@ -27,9 +27,9 @@ export default function AdminDashboard() {
     fetchServiceAreas,
     addServiceArea,
     removeServiceArea,
-    fetchBookings,
-    deleteBooking,
-    updateBookingStatus,
+
+
+
     logoutAdmin,
     contactMessages,
     fetchMessages,
@@ -114,7 +114,52 @@ export default function AdminDashboard() {
 
 
 
+  //Booking logic is hear *************************************************************************************************************
 
+  const [bookings, setBookings] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("pending");
+
+  // Fetch bookings by status
+  const fetchBookings = async (status) => {
+    try {
+      const res = await axios.get(`/api/booking-backend/status/${status}`);
+      setBookings(res.data);
+    } catch (err) {
+      console.error("Failed to fetch bookings:", err);
+    }
+  };
+
+  // Update booking status → Delivered
+  const markAsDelivered = async (id) => {
+    try {
+      await axios.put(`/api/booking-backend/${id}/status`, { status: "delivered" });
+      fetchBookings(statusFilter); // refresh
+    } catch (err) {
+      console.error(" Failed to update booking:", err);
+    }
+  };
+
+  // Delete booking
+  const deleteBooking = async (id) => {
+    const ok = await confirm("Are you sure you want to delete this booking?");
+    if (!ok) return;
+    try {
+      await axios.delete(`/api/booking-backend/${id}`);
+      fetchBookings(statusFilter); // refresh
+    } catch (err) {
+      console.error("Failed to delete booking:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings(statusFilter);
+  }, [statusFilter]);
+
+
+
+
+
+  ////////////////////////////////////////////////////////
   useEffect(() => {
     fetchTyres();
     fetchServiceAreas();
@@ -305,12 +350,12 @@ export default function AdminDashboard() {
   };
 
 
-  const handleDeleteBooking = async (id) => {
-    const ok = await confirm("Are you sure you want to delete this Booking");
-    if (!ok) return;
+  // const handleDeleteBooking = async (id) => {
+  //   const ok = await confirm("Are you sure you want to delete this Booking");
+  //   if (!ok) return;
 
-    await deleteBooking(id);
-  };
+  //   await deleteBooking(id);
+  // };
 
   const handleAddBlog = async () => {
     setLoading(true);
@@ -355,63 +400,63 @@ export default function AdminDashboard() {
   });
 
   const [page, setPage] = useState(1);
-const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
 
   // Fetch tyres whenever filters change
-const fetchFilterTyres = async (pageNumber = 1, isNewFilter = false) => {
-  setLoading(true);
+  const fetchFilterTyres = async (pageNumber = 1, isNewFilter = false) => {
+    setLoading(true);
 
-  const params = { page: pageNumber, limit: 50 }; // backend pagination
-  Object.keys(filters).forEach(key => {
-    if (filters[key]) params[key] = filters[key];
-  });
-
-  const res = await axios.get('/api/tyreall/search', { params });
-
-  if (isNewFilter) {
-    setFilterTyres(res.data.tyres); // reset when filters change
-  } else {
-    setFilterTyres(prev => [...prev, ...res.data.tyres]); // append for infinite scroll
-  }
-
-  setHasMore(pageNumber < res.data.totalPages); // check if more pages exist
-  setLoading(false);
-};
-
-useEffect(() => {
-  setPage(1);
-  fetchFilterTyres(1, true); // fresh fetch when filter changes
-}, [filters]);
-
-
-
-const observer = useRef();
-
-const lastTyreRef = useCallback(
-  (node) => {
-    if (loading) return;
-    if (observer.current) observer.current.disconnect();
-
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) {
-        setPage(prev => prev + 1);
-      }
+    const params = { page: pageNumber, limit: 50 }; // backend pagination
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params[key] = filters[key];
     });
 
-    if (node) observer.current.observe(node);
-  },
-  [loading, hasMore]
-);
+    const res = await axios.get('/api/tyreall/search', { params });
 
- 
-useEffect(() => {
-  if (page > 1) {
-    fetchFilterTyres(page, false);
-  }
-}, [page]);
+    if (isNewFilter) {
+      setFilterTyres(res.data.tyres); // reset when filters change
+    } else {
+      setFilterTyres(prev => [...prev, ...res.data.tyres]); // append for infinite scroll
+    }
+
+    setHasMore(pageNumber < res.data.totalPages); // check if more pages exist
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    setPage(1);
+    fetchFilterTyres(1, true); // fresh fetch when filter changes
+  }, [filters]);
 
 
-  
+
+  const observer = useRef();
+
+  const lastTyreRef = useCallback(
+    (node) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prev => prev + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
+
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchFilterTyres(page, false);
+    }
+  }, [page]);
+
+
+
 
 
   const handleFilterChange = (e) => {
@@ -447,7 +492,7 @@ useEffect(() => {
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
-        {['tyres', 'service', 'contact', 'blogs', 'coupon'].map((key) => (
+        {['tyres', 'service', 'contact', 'blogs', 'coupon', 'booking'].map((key) => (
           <button
             key={key}
             className={`px-4 py-2 rounded text-sm sm:text-base w-full sm:w-auto ${tab === key ? 'bg-red-600 text-white' : 'bg-gray-200'
@@ -462,7 +507,9 @@ useEffect(() => {
                   ? 'Contact'
                   : key === 'blogs'
                     ? 'Blogs'
-                    : key}
+                    : key === 'coupon'
+                      ? 'coupon'
+                      : key}
           </button>
         ))}
       </div>
@@ -811,129 +858,126 @@ useEffect(() => {
 
           {/* Tyre Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {FilterTyres.map((tyre,index) =>
-            
-             
-            
-            { const isLastElement = index === FilterTyres.length - 1;
-              
+            {FilterTyres.map((tyre, index) => {
+              const isLastElement = index === FilterTyres.length - 1;
+
               return (
-              
 
-              <div key={tyre._id} ref={isLastElement ? lastTyreRef : null} className="border rounded-lg p-4 bg-white shadow-md space-y-2">
-                <img
-                  src={tyre.image_url}
-                  alt={`${tyre.Brand} ${tyre.Model}`}
-                  className="w-full h-32 object-contain mb-2"
-                />
-                <div className="text-sm">
-                  <p><strong>Brand:</strong> {tyre.Brand}</p>
-                  <p><strong>Model:</strong> {tyre.Model}</p>
-                  <p><strong>Size:</strong> {tyre.SIZE}</p>
-                  <p><strong>Load/Speed:</strong> {tyre["LOAD/SPEED RATING"]}</p>
-                  <p><strong>Type:</strong> {tyre.Type}</p>
-                  <p><strong>Marking:</strong> {tyre.Marking || 'N/A'}</p>
-                  <p><strong>RunFlat:</strong> {tyre.RunFlat || 'N/A'}</p>
-                  <p><strong>Price:</strong> ${tyre["Price Incl GST"]}</p>
-                  <p><strong>Price for 1:</strong> ${tyre["Price for 1"] || 'N/A'}</p>
-                  <p><strong>Price for 2:</strong> ${tyre["Price for 2"] || 'N/A'}</p>
-                  <p><strong>Price for 3:</strong> ${tyre["Price for 3"] || 'N/A'}</p>
-                  <p><strong>Price for 4:</strong> ${tyre["Price for 4"] || 'N/A'}</p>
-                  <p><strong>Price for 5:</strong> ${tyre["Price for 5"] || 'N/A'}</p>
 
-                  <p><strong>In Stock:</strong> {tyre["In Stock"]}</p>
-                  <p><strong>Unloading in 24 Hrs:</strong> {tyre["UNLOADING IN 24 HRS"]}</p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-2">
-                  {/* Delete */}
-                  <div className="flex justify-end">
-                    <button
-                      onClick={() => handleDelete(tyre._id)}
-                      className="text-red-600 hover:text-red-800 p-2"
-                      title="Delete Tyre"
-                    >
-                      <FaTrash size={16} />
-                    </button>
-                  </div>
-
-                  {/* Image Upload */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) handleImageupdate(tyre._id, file);
-                    }}
-                    className="block w-full text-sm text-gray-700"
+                <div key={tyre._id} ref={isLastElement ? lastTyreRef : null} className="border rounded-lg p-4 bg-white shadow-md space-y-2">
+                  <img
+                    src={tyre.image_url}
+                    alt={`${tyre.Brand} ${tyre.Model}`}
+                    className="w-full h-32 object-contain mb-2"
                   />
+                  <div className="text-sm">
+                    <p><strong>Brand:</strong> {tyre.Brand}</p>
+                    <p><strong>Model:</strong> {tyre.Model}</p>
+                    <p><strong>Size:</strong> {tyre.SIZE}</p>
+                    <p><strong>Load/Speed:</strong> {tyre["LOAD/SPEED RATING"]}</p>
+                    <p><strong>Type:</strong> {tyre.Type}</p>
+                    <p><strong>Marking:</strong> {tyre.Marking || 'N/A'}</p>
+                    <p><strong>RunFlat:</strong> {tyre.RunFlat || 'N/A'}</p>
+                    <p><strong>Price:</strong> ${tyre["Price Incl GST"]}</p>
+                    <p><strong>Price for 1:</strong> ${tyre["Price for 1"] || 'N/A'}</p>
+                    <p><strong>Price for 2:</strong> ${tyre["Price for 2"] || 'N/A'}</p>
+                    <p><strong>Price for 3:</strong> ${tyre["Price for 3"] || 'N/A'}</p>
+                    <p><strong>Price for 4:</strong> ${tyre["Price for 4"] || 'N/A'}</p>
+                    <p><strong>Price for 5:</strong> ${tyre["Price for 5"] || 'N/A'}</p>
 
-
-                  {/* Price Update */}
-                  <div className="space-y-1">
-                    {["Price for 1", "Price for 2", "Price for 3", "Price for 4", "Price for 5"].map((label) => (
-                      <div key={label} className="flex items-center gap-1">
-                        <label className="text-xs w-20">{label}:</label>
-                        <input
-                          type="number"
-                          defaultValue={tyre[label]}
-                          onChange={(e) => {
-                            const newPrice = e.target.value.trim();
-                            setUpdatedPrices((prev) => ({
-                              ...prev,
-                              [tyre._id]: {
-                                ...(prev[tyre._id] || {}),
-                                [label]: newPrice
-                              }
-                            }));
-                          }}
-                          className="w-20 border px-1 py-0.5 rounded text-xs"
-                        />
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => {
-                        if (updatedPrices[tyre._id]) {
-                          handlePriceUpdate(tyre._id, updatedPrices[tyre._id]);
-                        }
-                      }}
-                      className="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700"
-                    >
-                      Update Prices
-                    </button>
+                    <p><strong>In Stock:</strong> {tyre["In Stock"]}</p>
+                    <p><strong>Unloading in 24 Hrs:</strong> {tyre["UNLOADING IN 24 HRS"]}</p>
                   </div>
 
+                  {/* Action Buttons */}
+                  <div className="space-y-2">
+                    {/* Delete */}
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => handleDelete(tyre._id)}
+                        className="text-red-600 hover:text-red-800 p-2"
+                        title="Delete Tyre"
+                      >
+                        <FaTrash size={16} />
+                      </button>
+                    </div>
 
-
-                  {/* Stock Update */}
-                  <div className="flex gap-1 items-center">
+                    {/* Image Upload */}
                     <input
-                      type="text"
-                      placeholder="Stock"
-                      defaultValue={tyre["In Stock"]}
+                      type="file"
+                      accept="image/*"
                       onChange={(e) => {
-                        setstockValue(e.target.value.trim())
+                        const file = e.target.files[0];
+                        if (file) handleImageupdate(tyre._id, file);
                       }}
-                      className="w-16 border px-1 py-0.5 rounded text-xs"
+                      className="block w-full text-sm text-gray-700"
                     />
-                    <button
-                      onClick={() => {
 
-                        if (stockValue !== undefined && stockValue !== "" && stockValue !== tyre["In Stock"]) {
-                          handleStockupdate(tyre._id, stockValue);
-                        }
-                      }}
-                      className="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      Update
-                    </button>
+
+                    {/* Price Update */}
+                    <div className="space-y-1">
+                      {["Price for 1", "Price for 2", "Price for 3", "Price for 4", "Price for 5"].map((label) => (
+                        <div key={label} className="flex items-center gap-1">
+                          <label className="text-xs w-20">{label}:</label>
+                          <input
+                            type="number"
+                            defaultValue={tyre[label]}
+                            onChange={(e) => {
+                              const newPrice = e.target.value.trim();
+                              setUpdatedPrices((prev) => ({
+                                ...prev,
+                                [tyre._id]: {
+                                  ...(prev[tyre._id] || {}),
+                                  [label]: newPrice
+                                }
+                              }));
+                            }}
+                            className="w-20 border px-1 py-0.5 rounded text-xs"
+                          />
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => {
+                          if (updatedPrices[tyre._id]) {
+                            handlePriceUpdate(tyre._id, updatedPrices[tyre._id]);
+                          }
+                        }}
+                        className="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700"
+                      >
+                        Update Prices
+                      </button>
+                    </div>
+
+
+
+                    {/* Stock Update */}
+                    <div className="flex gap-1 items-center">
+                      <input
+                        type="text"
+                        placeholder="Stock"
+                        defaultValue={tyre["In Stock"]}
+                        onChange={(e) => {
+                          setstockValue(e.target.value.trim())
+                        }}
+                        className="w-16 border px-1 py-0.5 rounded text-xs"
+                      />
+                      <button
+                        onClick={() => {
+
+                          if (stockValue !== undefined && stockValue !== "" && stockValue !== tyre["In Stock"]) {
+                            handleStockupdate(tyre._id, stockValue);
+                          }
+                        }}
+                        className="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600"
+                      >
+                        Update
+                      </button>
+                    </div>
+
+
                   </div>
-
-
                 </div>
-              </div>
-            )
+              )
             })}
           </div>
 
@@ -1244,6 +1288,91 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+      {
+        tab === 'booking' && (
+
+          <div className="p-6">
+            {/* Toggle Buttons */}
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setStatusFilter("pending")}
+                className={`px-4 py-2 rounded-lg font-semibold ${statusFilter === "pending" ? "bg-red-600 text-white" : "bg-gray-200"
+                  }`}
+              >
+                Pending
+              </button>
+              <button
+                onClick={() => setStatusFilter("delivered")}
+                className={`px-4 py-2 rounded-lg font-semibold ${statusFilter === "delivered"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200"
+                  }`}
+              >
+                Delivered
+              </button>
+            </div>
+
+            {/* Booking Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {bookings.length === 0 ? (
+                <p className="text-gray-500">No bookings found.</p>
+              ) : (
+                bookings.map((booking) => (
+                  <div
+                    key={booking._id}
+                    className="border rounded-xl shadow-md p-4 bg-white"
+                  >
+                    <h2 className="text-lg font-bold mb-2">
+                      Order #{booking.orderId}
+                    </h2>
+                    <p>
+                      <span className="font-semibold">Customer:</span>{" "}
+                      {booking.customer.firstName} {booking.customer.lastName}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Phone:</span>{" "}
+                      {booking.customer.phone}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Date:</span>{" "}
+                      {booking.selectedDate} at {booking.selectedTime}
+                    </p>
+                    <p className="font-semibold mt-2">Cart:</p>
+                    <ul className="list-disc ml-6 text-sm">
+                      {booking.cart.map((item, idx) => (
+                        <li key={idx}>
+                          {item.brand} {item.model} ({item.width}/{item.profile} R
+                          {item.rimSize}) x {item.quantity}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Buttons */}
+                    <div className="flex justify-between mt-4">
+                      {statusFilter === "pending" && (
+                        <button
+                          onClick={() => markAsDelivered(booking._id)}
+                          className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600"
+                        >
+                          Mark Delivered
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteBooking(booking._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        )
+      }
 
 
 

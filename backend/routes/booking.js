@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 const BookingSlot = require("../models/BookingSlot");
+const Booking = require("../models/Booking");
+const Tyreall = require("../models/Tyreall");
+
 
 // ✅ Setup transporter (example: Gmail, better use custom domain SMTP in production)
 const transporter = nodemailer.createTransport({
@@ -177,10 +180,81 @@ router.post("/confirm", async (req, res) => {
         .json({ success: false, message: "Slot is fully booked" });
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    // Save booking in DB
+const newBooking = new Booking({
+  orderId,
+  customer: {
+    firstName: form.firstName,
+    lastName: form.lastName,
+    email: form.email,
+    phone: form.phone,
+  },
+  address: {
+    address: formNew.address,
+    suburb: formNew.suburb,
+    postcode: formNew.postcode,
+  },
+  vehicle: {
+    vehicleDetails: formData.vehicleDetails,
+    state: formData.state,
+    colour: formData.colour,
+    make: formData.make,
+    model: formData.model,
+  },
+  cart,
+  selectedTyres,
+  selectedDate,
+  selectedTime,
+  appliedCoupon,
+  total,
+  finalAmount,
+  status: "pending", // default
+});
+
+await newBooking.save();
+
+
+// STOCK UPDATE LOGIC HERE
+for (const item of cart) {
+  try {
+    // Force quantity into a number
+    const orderedQty = Number(item.quantity);
+
+    const tyre = await Tyreall.findOne({
+      Brand: item.brand,
+      Model: item.model,
+      SIZE: `${item.width}/${item.profile}R${item.rimSize}`, // adjust if SIZE format differs
+    });
+
+    if (tyre) {
+      const currentStock = parseInt(tyre["In Stock"], 10) || 0;
+      const newStock = currentStock - orderedQty;
+
+      // Save back as string (your schema uses String type)
+      tyre["In Stock"] = String(newStock >= 0 ? newStock : 0);
+      await tyre.save();
+
+      console.log(`✅ Stock updated for ${item.brand} ${item.model}: ${currentStock} → ${tyre["In Stock"]}`);
+    } else {
+      console.warn(`⚠️ Tyre not found in DB: ${item.brand} ${item.model} ${item.width}/${item.profile}R${item.rimSize}`);
+    }
+  } catch (err) {
+    console.error(`❌ Failed to update stock for ${item.brand} ${item.model}`, err);
+  }
+}
+
+
+
+
     // Return success
     res.status(200).json({
       success: true,
       message: `Slot booked for ${selectedDate} (${selectedTime})`,
+      booking: newBooking,
       data: slot,
     });
 

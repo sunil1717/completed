@@ -19,7 +19,7 @@ const TyreSchema = new mongoose.Schema({
   "Price Incl GST": { type: Number },
 
   "In Stock": { type: String },
-  "UNLOADING IN 24 HRS": { type: Number },
+  "UNLOADING IN 24 HRS": { type:  String },
 
   brand_logo_url: { type: String },
   category: { type: String },

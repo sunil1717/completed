@@ -35,6 +35,7 @@ const tyreallRoutes = require('./routes/tyreallRoutes');
 const couponRoutes = require('./routes/couponRoutes');
 const bookingRoutes = require('./routes/booking');
 const bookingSlotRoutes = require('./routes/bookingSlotRoutes');
+const bookingBackendDbRoutes=require('./routes/bookDetailsDb')
 
 // Root Route
 app.get('/', (req, res) => {
@@ -53,6 +54,8 @@ app.use('/api/tyreall', tyreallRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/booking', bookingRoutes);
 app.use('/api/slots', bookingSlotRoutes);
+app.use('/api/booking-backend', bookingBackendDbRoutes);
+
 
 // 🧠 Local development only
 if (require.main === module) {

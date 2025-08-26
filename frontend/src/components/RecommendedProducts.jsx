@@ -108,7 +108,7 @@ const RecommendedProducts = ({ tyres }) => {
       logo: tyre.brand_logo_url,
       image: tyre.image_url,
       price: price,
-      "In Stock":tyre["In Stock"],
+      "In Stock": tyre["In Stock"],
       "Price for 1": tyre["Price for 1"],
       "Price for 2": tyre["Price for 2"],
       "Price for 3": tyre["Price for 3"],
@@ -231,17 +231,18 @@ const RecommendedProducts = ({ tyres }) => {
                 <h4 className="text-md font-bold text-gray-800 mb-1 text-center">
                   {tyre.Model}
                 </h4>
-                <p className="text-sm text-gray-600 text-center mb-2">
-                  {tyre.SIZE} ({tyre["LOAD/SPEED RATING"]})
+                <p className="text-sm text-gray-600 text-center mb-4 flex flex-row justify-center items-center ">
+                  <span> {tyre.SIZE} ({tyre["LOAD/SPEED RATING"]})</span>
+                  {tyre.Marking && tyre.Marking !== "NaN" && (
+                    <div className="flex items-center justify-center ml-2">
+                      <span className="text-sm text-gray-600 text-center ">
+                        {tyre.Marking}
+                      </span>
+                    </div>
+                  )}
                 </p>
 
-                {tyre.Marking && tyre.Marking !== "NaN" && (
-                  <div className="flex items-center justify-center">
-                    <span className="text-sm text-gray-600 text-center mb-4">
-                      ( {tyre.Marking} )
-                    </span>
-                  </div>
-                )}
+
 
                 {/* Tyre Image */}
                 {tyre.image_url && (
