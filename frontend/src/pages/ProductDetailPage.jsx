@@ -114,6 +114,7 @@ const ProductSingle = () => {
         logo: tyre.brand_logo_url,
         image: tyre.image_url,
         price,
+        "In Stock":tyre["In Stock"],
         "Price for 1": tyre["Price for 1"],
         "Price for 2": tyre["Price for 2"],
         "Price for 3": tyre["Price for 3"],
@@ -126,7 +127,7 @@ const ProductSingle = () => {
   };
 
 
-  
+
 
   return (
     <>
@@ -165,14 +166,18 @@ const ProductSingle = () => {
             {/* Quantity buttons */}
             <div className="grid grid-cols-5 gap-2 w-full">
               {[1, 2, 3, 4, 5].map((num) => {
+                const stock = parseInt(tyre["In Stock"], 10);
+                const isAvailable = num <= stock;
                 const isSelected = selected === num;
                 return (
                   <button
                     key={num}
-                    onClick={() => setSelected(num)}
-                    className={`sm:w-25 h-15 w-15   rounded border border-gray-400 text-sm font-semibold hover:cursor-pointer ${isSelected
-                      ? "bg-red-600 text-white"
-                      : "bg-gray-200 text-gray-800"
+                    onClick={() => isAvailable && setSelected(num)}
+                    disabled={!isAvailable}
+                    className={`sm:w-25 h-15 w-15 rounded border border-gray-400 text-sm font-semibold 
+        ${isAvailable
+                        ? (isSelected ? "bg-red-600 text-white" : "bg-gray-200 text-gray-800 hover:cursor-pointer")
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}
                   >
                     {num}
@@ -208,27 +213,27 @@ const ProductSingle = () => {
 
 
             <div className="max-w-2xl mt-10 mx-auto p-4">
-            <h2 className="text-2xl font-bold mb-6">FAQs</h2>
-            {faqs.map((faq, index) => (
-              <div key={index} className="border-b py-3">
-                <button
-                  onClick={() => toggleFAQ(index)}
-                  className="w-full text-left flex justify-between items-center font-medium"
-                >
-                  {faq.question}
-                  <span>{activeIndex === index ? "-" : "+"}</span>
-                </button>
-                {activeIndex === index && (
-                  <p className="mt-2 text-gray-600">{faq.answer}</p>
-                )}
-              </div>
-            ))}
-          </div>
+              <h2 className="text-2xl font-bold mb-6">FAQs</h2>
+              {faqs.map((faq, index) => (
+                <div key={index} className="border-b py-3">
+                  <button
+                    onClick={() => toggleFAQ(index)}
+                    className="w-full text-left flex justify-between items-center font-medium"
+                  >
+                    {faq.question}
+                    <span>{activeIndex === index ? "-" : "+"}</span>
+                  </button>
+                  {activeIndex === index && (
+                    <p className="mt-2 text-gray-600">{faq.answer}</p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          
 
-          
+
+
         </div>
       </div>
       <Footer />

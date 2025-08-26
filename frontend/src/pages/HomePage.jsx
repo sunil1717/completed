@@ -276,8 +276,8 @@ export default function HomePage() {
   const handleSizeSearch = async () => {
 
     setSearching(true);
-     setstaggerfit(false);
-    
+    setstaggerfit(false);
+
 
     setFilters(prev => ({ ...prev, width: sizeForm.width }));
     setFilters(prev => ({ ...prev, profile: sizeForm.profile }));
@@ -311,7 +311,7 @@ export default function HomePage() {
     setTyreData(data);
     setActivetyreTab("front")
 
- 
+
 
 
     const newSizeForm = {
@@ -340,38 +340,38 @@ export default function HomePage() {
 
 
 
-    
+
   };
 
 
 
 
   const handleTyreSubmitForSpecific = async (tab) => {
-   
-    
 
-  if(tab=== "rear"){
 
-       const newSizeForm = {
-      width: tyreData.rear.width,
-      profile: tyreData.rear.profile,
-      rimSize: tyreData.rear.rim
-    };
-     setSizeForm(newSizeForm);
-     setSearching(true);
+
+    if (tab === "rear") {
+
+      const newSizeForm = {
+        width: tyreData.rear.width,
+        profile: tyreData.rear.profile,
+        rimSize: tyreData.rear.rim
+      };
+      setSizeForm(newSizeForm);
+      setSearching(true);
       setFilters(prev => ({ ...prev, width: newSizeForm.width }));
-    setFilters(prev => ({ ...prev, profile: newSizeForm.profile }));
-    setFilters(prev => ({ ...prev, rim: newSizeForm.rimSize }));
-    setFilters(prev => ({ ...prev, brand:"" }));
+      setFilters(prev => ({ ...prev, profile: newSizeForm.profile }));
+      setFilters(prev => ({ ...prev, rim: newSizeForm.rimSize }));
+      setFilters(prev => ({ ...prev, brand: "" }));
 
-     const res = await searchBySize(newSizeForm);
+      const res = await searchBySize(newSizeForm);
 
-    setTyres(res);
-     setHasSearched(true);
-    setSearching(false);
-    return ;
+      setTyres(res);
+      setHasSearched(true);
+      setSearching(false);
+      return;
 
-  }
+    }
 
     const newSizeForm = {
       width: tyreData.front.width,
@@ -379,14 +379,14 @@ export default function HomePage() {
       rimSize: tyreData.front.rim
     };
 
-     setSizeForm(newSizeForm);
+    setSizeForm(newSizeForm);
 
     setSearching(true);
 
     setFilters(prev => ({ ...prev, width: newSizeForm.width }));
     setFilters(prev => ({ ...prev, profile: newSizeForm.profile }));
     setFilters(prev => ({ ...prev, rim: newSizeForm.rimSize }));
-    setFilters(prev => ({ ...prev, brand:""}));
+    setFilters(prev => ({ ...prev, brand: "" }));
 
 
     const res = await searchBySize(newSizeForm);
@@ -400,7 +400,7 @@ export default function HomePage() {
 
 
 
- };
+  };
 
 
 
@@ -440,6 +440,9 @@ export default function HomePage() {
     const selectedQty = selectedPriceOption[tyreKey];
     const selectedOption = priceOptions.find(option => option.qty === selectedQty);
 
+
+
+
     return (
       <div
         key={tyreKey}
@@ -469,9 +472,18 @@ export default function HomePage() {
         <h4 className="text-md font-bold text-gray-800 mb-1 text-center">
           {tyre.Model}
         </h4>
-        <p className="text-sm text-gray-600 text-center mb-4">
+        <p className="text-sm text-gray-600 text-center mb-2">
           {width}/{profile}R{rimSize} ({tyre["LOAD/SPEED RATING"]})
         </p>
+
+        {tyre.Marking && tyre.Marking !== "NaN"  && (
+          <div className="flex items-center justify-center">
+          <span className="text-sm text-gray-600 text-center mb-4">
+            ( {tyre.Marking} )
+          </span>
+          </div>
+        )}
+
         {
           tyre.RunFlat === "YES" &&
           (<div className="flex flex-cols items-center justify-center mb-4">
@@ -531,32 +543,45 @@ export default function HomePage() {
                 }}
                   className=' text-end text-gray-500'><ChevronDownIcon className="w-5 h-5" /></button>
               )}
-              {priceOptions.map((option) => (
-                <label
-                  key={option.qty}
-                  className={`flex items-center justify-between text-sm text-black/90 font-medium cursor-pointer px-3 py-2 border border-gray-300 bg-gray-100 mb-1  hover:bg-red-200 rounded-lg transition `}
-                >
-                  <div className="flex items-center  gap-1">
-                    {!isOutofstock && (<input
-                      type="radio"
-                      name={`price-option-home-${tyreKey}`}
-                      value={option.qty}
-                      checked={selectedPriceOption[tyreKey] === option.qty}
-                      onChange={() =>
-                        setSelectedPriceOption((prev) => ({
-                          ...prev,
-                          [tyreKey]: option.qty,
-                        }))
+              {priceOptions.map((option) => {
+
+                const isAvailable = option.qty <= parseInt(tyre["In Stock"], 10);
+
+
+                return (
+                  <label
+                    key={option.qty}
+                    className={`flex items-center justify-between text-sm text-black/90 font-medium cursor-pointer px-3 py-2 border border-gray-300 bg-gray-100 mb-1  hover:bg-red-200 rounded-lg transition `}
+                  >
+                    <div className="flex items-center  gap-1">
+                      {isAvailable && (<input
+                        type="radio"
+                        name={`price-option-home-${tyreKey}`}
+                        value={option.qty}
+                        checked={selectedPriceOption[tyreKey] === option.qty}
+                        onChange={() =>
+                          setSelectedPriceOption((prev) => ({
+                            ...prev,
+                            [tyreKey]: option.qty,
+                          }))
+                        }
+                        disabled={!isAvailable}
+                        className="appearance-none w-4 h-4 border border-black rounded-lg bg-white/20 checked:bg-red-500 checked:border-gray-500 transition-all shadow-sm"
+                      />)
                       }
-                      disabled={isOutofstock}
-                      className="appearance-none w-4 h-4 border border-black rounded-lg bg-white/20 checked:bg-red-500 checked:border-gray-500 transition-all shadow-sm"
-                    />)
-                    }
-                    <span className={`${isOutofstock ? "line-through text-black/90 cursor-not-allowed" : "text-black/90"}`}>Qty {option.qty}</span>
-                  </div>
-                  <span className="text-black font-semibold">${option.price.toFixed(2)} ea</span>
-                </label>
-              ))}
+                      <span
+                        className={`${isAvailable
+                          ? "text-black/90"
+                          : "line-through text-black/90 cursor-not-allowed"
+                          }`}
+                      >
+                        Qty {option.qty}
+                      </span>
+                    </div>
+                    <span className="text-black font-semibold">${option.price.toFixed(2)} ea</span>
+                  </label>
+                )
+              })}
 
               {(
 
@@ -576,6 +601,7 @@ export default function HomePage() {
                       logo: tyre.brand_logo_url,
                       image: tyre.image_url,
                       price: selectedOption.price,
+                      "In Stock":tyre["In Stock"],
                       "Price for 1": tyre["Price for 1"],
                       "Price for 2": tyre["Price for 2"],
                       "Price for 3": tyre["Price for 3"],
@@ -1264,25 +1290,26 @@ export default function HomePage() {
 
                       {staggerfit && (<div className="flex gap-2 self-start">
                         <button
-                          onClick={() =>{ setActivetyreTab("front") 
-                             handleTyreSubmitForSpecific("front")
+                          onClick={() => {
+                            setActivetyreTab("front")
+                            handleTyreSubmitForSpecific("front")
                           }}
                           className={`px-3 py-1 rounded-md text-xs font-medium border ${activetyreTab === "front"
-                              ? "bg-red-600 text-white border-red-600"
-                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                            ? "bg-red-600 text-white border-red-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                             }`}
                         >
                           Front Tyre
                         </button>
 
                         <button
-                          onClick={() => { 
+                          onClick={() => {
                             setActivetyreTab("rear")
-                           handleTyreSubmitForSpecific("rear")
+                            handleTyreSubmitForSpecific("rear")
                           }}
                           className={`px-3 py-1 rounded-md text-xs font-medium border ${activetyreTab === "rear"
-                              ? "bg-red-600 text-white border-red-600"
-                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                            ? "bg-red-600 text-white border-red-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                             }`}
                         >
                           Rear Tyre

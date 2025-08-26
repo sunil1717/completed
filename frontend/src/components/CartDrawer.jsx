@@ -15,16 +15,16 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [loadingItemId, setLoadingItemId] = useState(null);
   const [animateOpen, setAnimateOpen] = useState(false);
-  
 
-   useEffect(() => {
+
+  useEffect(() => {
     if (isOpen) {
       // small delay to trigger transition
-      
+
       requestAnimationFrame(() => setAnimateOpen(true));
     } else {
       setAnimateOpen(false);
-       
+
     }
   }, [isOpen]);
 
@@ -63,7 +63,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
     0
   );
 
-  
+
 
   return (
     <>
@@ -135,16 +135,20 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       {[1, 2, 3, 4, 5].map((num) => {
+                        const stock = parseInt(item["In Stock"], 10);
+                        const isAvailable = num <= stock;
                         const isSelected = item.quantity === num;
                         return (
                           <button
                             key={num}
+                            disabled={!isAvailable}
                             onClick={() =>
-                              handleQuantityChange(index, num, item)
+                              isAvailable && handleQuantityChange(index, num, item)
                             }
-                            className={`w-8 h-8 rounded border text-sm font-semibold ${isSelected
-                              ? "bg-red-600 text-white"
-                              : "bg-gray-200 text-gray-800"
+                            className={`w-8 h-8 rounded border text-sm font-semibold
+        ${isAvailable
+                                ? (isSelected ? "bg-red-600 text-white" : "bg-gray-200 text-gray-800 hover:cursor-pointer")
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
                               }`}
                           >
                             {num}
@@ -240,16 +244,20 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         {[1, 2, 3, 4, 5].map((num) => {
+                          const stock = parseInt(item["In Stock"], 10);
+                          const isAvailable = num <= stock;
                           const isSelected = item.quantity === num;
                           return (
                             <button
                               key={num}
+                              disabled={!isAvailable}
                               onClick={() =>
-                                handleQuantityChange(index, num, item)
+                                isAvailable && handleQuantityChange(index, num, item)
                               }
-                              className={`w-8 h-8 rounded border text-sm font-semibold ${isSelected
-                                ? "bg-red-600 text-white"
-                                : "bg-gray-200 text-gray-800"
+                              className={`w-8 h-8 rounded border text-sm font-semibold
+        ${isAvailable
+                                  ? (isSelected ? "bg-red-600 text-white" : "bg-gray-200 text-gray-800 hover:cursor-pointer")
+                                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
                                 }`}
                             >
                               {num}
@@ -286,8 +294,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
             </button>
           </div>
         </div>
-      
-       )}
+
+      )}
 
       <style>
         {`

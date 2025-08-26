@@ -108,6 +108,7 @@ const RecommendedProducts = ({ tyres }) => {
       logo: tyre.brand_logo_url,
       image: tyre.image_url,
       price: price,
+      "In Stock":tyre["In Stock"],
       "Price for 1": tyre["Price for 1"],
       "Price for 2": tyre["Price for 2"],
       "Price for 3": tyre["Price for 3"],
@@ -230,9 +231,17 @@ const RecommendedProducts = ({ tyres }) => {
                 <h4 className="text-md font-bold text-gray-800 mb-1 text-center">
                   {tyre.Model}
                 </h4>
-                <p className="text-sm text-gray-600 text-center mb-4">
+                <p className="text-sm text-gray-600 text-center mb-2">
                   {tyre.SIZE} ({tyre["LOAD/SPEED RATING"]})
                 </p>
+
+                {tyre.Marking && tyre.Marking !== "NaN" && (
+                  <div className="flex items-center justify-center">
+                    <span className="text-sm text-gray-600 text-center mb-4">
+                      ( {tyre.Marking} )
+                    </span>
+                  </div>
+                )}
 
                 {/* Tyre Image */}
                 {tyre.image_url && (
@@ -278,31 +287,43 @@ const RecommendedProducts = ({ tyres }) => {
                         }}
                           className=' text-end text-gray-500'><ChevronDownIcon className="w-5 h-5" /></button>
                       )}
-                      {priceOptions.map((option) => (
-                        <label
-                          key={option.qty}
-                          className="flex items-center justify-between bg-gray-100 border border-gray-300   text-sm text-black/90 font-medium cursor-pointer px-3 py-2 mb-1 hover:bg-red-200 rounded-lg transition"
-                        >
-                          <div className="flex items-center gap-1">
-                            {!isOutofstock && (<input
-                              type="radio"
-                              name={`price-option-recomended-${tyreKey}`}
-                              value={option.qty}
-                              checked={selectedpriceoption[tyreKey] === option.qty}
-                              onChange={() =>
-                                setselectedpriceoption((prev) => ({
-                                  ...prev,
-                                  [tyreKey]: option.qty,
-                                }))
-                              }
-                              disabled={isOutofstock}
-                              className="appearance-none w-4 h-4 border border-black rounded-lg bg-white/20 checked:bg-red-500 checked:border-gray-400 transition-all shadow-sm"
-                            />)}
-                            <span className={`${isOutofstock ? "line-through text-black/90 cursor-not-allowed" : "text-black/90"}`}>Qty {option.qty}</span>
-                          </div>
-                          <span className="text-black font-semibold">${option.price.toFixed(2)} ea</span>
-                        </label>
-                      ))}
+                      {priceOptions.map((option) => {
+
+                        const isAvailable = option.qty <= parseInt(tyre["In Stock"], 10);
+
+                        return (
+                          <label
+                            key={option.qty}
+                            className="flex items-center justify-between bg-gray-100 border border-gray-300   text-sm text-black/90 font-medium cursor-pointer px-3 py-2 mb-1 hover:bg-red-200 rounded-lg transition"
+                          >
+                            <div className="flex items-center gap-1">
+                              {isAvailable && (<input
+                                type="radio"
+                                name={`price-option-recomended-${tyreKey}`}
+                                value={option.qty}
+                                checked={selectedpriceoption[tyreKey] === option.qty}
+                                onChange={() =>
+                                  setselectedpriceoption((prev) => ({
+                                    ...prev,
+                                    [tyreKey]: option.qty,
+                                  }))
+                                }
+                                disabled={!isAvailable}
+                                className="appearance-none w-4 h-4 border border-black rounded-lg bg-white/20 checked:bg-red-500 checked:border-gray-400 transition-all shadow-sm"
+                              />)}
+                              <span
+                                className={`${isAvailable
+                                  ? "text-black/90"
+                                  : "line-through text-black/90 cursor-not-allowed"
+                                  }`}
+                              >
+                                Qty {option.qty}
+                              </span>
+                            </div>
+                            <span className="text-black font-semibold">${option.price.toFixed(2)} ea</span>
+                          </label>
+                        )
+                      })}
 
                       {(
 
