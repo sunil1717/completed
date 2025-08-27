@@ -149,103 +149,138 @@ router.post("/confirm", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Date and phase are required" });
     }
+    const phases = ["morning", "lunch", "afternoon"];
 
-    // Determine default availability based on phase
+    // === FLEXIBLE BOOKING HANDLING ===
+    if (selectedTime === "flexible") {
+      // Randomize phases order
+      const shuffledPhases = phases.sort(() => 0.5 - Math.random());
+      let bookedPhase = null;
+
+      for (const phase of shuffledPhases) {
+        let slot = await BookingSlot.findOne({ date: selectedDate, phase });
+
+        if (!slot) {
+          // Create new slot if not exist
+          slot = new BookingSlot({
+            date: selectedDate,
+            phase,
+            availableSlots: 2, // default 3 - 1 (because booking this now)
+          });
+          await slot.save();
+          bookedPhase = phase;
+          break;
+        }
+
+        if (slot.availableSlots > 0) {
+          slot.availableSlots -= 1;
+          await slot.save();
+          bookedPhase = phase;
+          break;
+        }
+
+        // else: this phase exists but is full, continue loop
+      }
+
+      if (!bookedPhase) {
+        return res.status(400).json({ success: false, message: "All slots are fully booked for this date" });
+      }
+
+    } else {
+
+    // === NORMAL BOOKING HANDLING ===
     let defaultAvailable = 0;
     if (["morning", "lunch", "afternoon"].includes(selectedTime)) {
       defaultAvailable = 3;
-    } else if (selectedTime === "flexible") {
-      defaultAvailable = 1;
     } else {
       return res.status(400).json({ success: false, message: "Invalid phase" });
     }
 
-    // Atomically find slot or create if missing, and decrement availableSlots
-    const slot = await BookingSlot.findOneAndUpdate(
-      { date: selectedDate, phase: selectedTime }, // search criteria
-      { $inc: { availableSlots: -1 } },           // decrement slots
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
+    let slot = await BookingSlot.findOne({ date: selectedDate, phase: selectedTime });
 
-    // If slot was just created (upserted), initialize availableSlots properly
-    if (slot.availableSlots < 0) {
-      slot.availableSlots = defaultAvailable - 1;
+    if (!slot) {
+      slot = new BookingSlot({
+        date: selectedDate,
+        phase: selectedTime,
+        availableSlots: defaultAvailable - 1, // create with 2 left
+      });
       await slot.save();
+    } else if (slot.availableSlots > 0) {
+      slot.availableSlots -= 1;
+      await slot.save();
+    } else {
+      return res.status(400).json({ success: false, message: "Slot is fully booked" });
     }
+  }
+  
 
-    // Check if fully booked after decrement
-    if (slot.availableSlots < 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Slot is fully booked" });
-    }
 
 
 
     ////////////////////////////////////////////////////////////////////////////
 
     // Save booking in DB
-const newBooking = new Booking({
-  orderId,
-  customer: {
-    firstName: form.firstName,
-    lastName: form.lastName,
-    email: form.email,
-    phone: form.phone,
-  },
-  address: {
-    address: formNew.address,
-    suburb: formNew.suburb,
-    postcode: formNew.postcode,
-  },
-  vehicle: {
-    vehicleDetails: formData.vehicleDetails,
-    state: formData.state,
-    colour: formData.colour,
-    make: formData.make,
-    model: formData.model,
-  },
-  cart,
-  selectedTyres,
-  selectedDate,
-  selectedTime,
-  appliedCoupon,
-  total,
-  finalAmount,
-  status: "pending", // default
-});
-
-await newBooking.save();
-
-
-// STOCK UPDATE LOGIC HERE
-for (const item of cart) {
-  try {
-    // Force quantity into a number
-    const orderedQty = Number(item.quantity);
-
-    const tyre = await Tyreall.findOne({
-      Brand: item.brand,
-      Model: item.model,
-      SIZE: `${item.width}/${item.profile}R${item.rimSize}`, // adjust if SIZE format differs
+    const newBooking = new Booking({
+      orderId,
+      customer: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+      },
+      address: {
+        address: formNew.address,
+        suburb: formNew.suburb,
+        postcode: formNew.postcode,
+      },
+      vehicle: {
+        vehicleDetails: formData.vehicleDetails,
+        state: formData.state,
+        colour: formData.colour,
+        make: formData.make,
+        model: formData.model,
+      },
+      cart,
+      selectedTyres,
+      selectedDate,
+      selectedTime,
+      appliedCoupon,
+      total,
+      finalAmount,
+      status: "pending", // default
     });
 
-    if (tyre) {
-      const currentStock = parseInt(tyre["In Stock"], 10) || 0;
-      const newStock = currentStock - orderedQty;
+    await newBooking.save();
 
-      // Save back as string (your schema uses String type)
-      tyre["In Stock"] = String(newStock >= 0 ? newStock : 0);
-      await tyre.save();
 
-      console.log(`✅ Stock updated for ${item.brand} ${item.model}: ${currentStock} → ${tyre["In Stock"]}`);
-    } else {
-      console.warn(`⚠️ Tyre not found in DB: ${item.brand} ${item.model} ${item.width}/${item.profile}R${item.rimSize}`);
+    // STOCK UPDATE LOGIC HERE
+    for (const item of cart) {
+      try {
+        // Force quantity into a number
+        const orderedQty = Number(item.quantity);
+
+        const tyre = await Tyreall.findOne({
+          Brand: item.brand,
+          Model: item.model,
+          SIZE: `${item.width}/${item.profile}R${item.rimSize}`, // adjust if SIZE format differs
+        });
+
+        if (tyre) {
+          const currentStock = parseInt(tyre["In Stock"], 10) || 0;
+          const newStock = currentStock - orderedQty;
+
+          // Save back as string (your schema uses String type)
+          tyre["In Stock"] = String(newStock >= 0 ? newStock : 0);
+          await tyre.save();
+
+          console.log(`✅ Stock updated for ${item.brand} ${item.model}: ${currentStock} → ${tyre["In Stock"]}`);
+        } else {
+          console.warn(`⚠️ Tyre not found in DB: ${item.brand} ${item.model} ${item.width}/${item.profile}R${item.rimSize}`);
+        }
+      } catch (err) {
+        console.error(`❌ Failed to update stock for ${item.brand} ${item.model}`, err);
+      }
     }
-  } catch (err) {
-    console.error(`❌ Failed to update stock for ${item.brand} ${item.model}`, err);
-  }
-}
 
 
 
@@ -255,7 +290,7 @@ for (const item of cart) {
       success: true,
       message: `Slot booked for ${selectedDate} (${selectedTime})`,
       booking: newBooking,
-      data: slot,
+      
     });
 
 
