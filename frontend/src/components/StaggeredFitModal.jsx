@@ -10,7 +10,7 @@ export default function StaggeredFitModal({ onClose, onSubmit }) {
   const [rear, setRear] = useState({ width: "", profile: "", rim: "" });
 
    const parsedSizes = filterOptions.SIZE.map(sizeStr => {
-    const match = sizeStr.match(/^(\d{3})\/(\d{2})R(\d{2})$/);
+    const match = sizeStr.match(/^(\d+)\/([\d.]+)R(\d+)$/);
     return match ? { width: match[1], profile: match[2], rimSize: match[3] } : null;
   }).filter(Boolean);
 

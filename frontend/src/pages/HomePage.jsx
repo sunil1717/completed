@@ -256,7 +256,8 @@ export default function HomePage() {
 
 
   const parsedSizes = filterOptions.SIZE.map(sizeStr => {
-    const match = sizeStr.match(/^(\d{3})\/(\d{2})R(\d{2})$/);
+    const match = sizeStr.match(/^(\d+)\/([\d.]+)R(\d+)$/);
+
     return match ? { width: match[1], profile: match[2], rimSize: match[3] } : null;
   }).filter(Boolean);
 
@@ -423,7 +424,7 @@ export default function HomePage() {
 
     let width = '', profile = '', rimSize = '';
     if (tyre.SIZE && typeof tyre.SIZE === 'string') {
-      const match = tyre.SIZE.match(/^(\d{3})\/(\d{2})R(\d{2})$/);
+      const match = tyre.SIZE.match(/^(\d+)\/([\d.]+)R(\d+)$/);
       if (match) {
         [, width, profile, rimSize] = match;
       }
@@ -473,17 +474,17 @@ export default function HomePage() {
           {tyre.Model}
         </h4>
         <p className="text-sm text-gray-600 text-center mb-4 flex flex-row justify-center items-center ">
-          <span> {width}/{profile}R{rimSize} ({tyre["LOAD/SPEED RATING"]})</span>   
-           {tyre.Marking && tyre.Marking !== "NaN"  && (
-          <div className="flex items-center justify-center ml-2">
-          <span className="text-sm text-gray-600 text-center ">
-             {tyre.Marking} 
-          </span>
-          </div>
-        )}
+          <span> {width}/{profile}R{rimSize} ({tyre["LOAD/SPEED RATING"]})</span>
+          {tyre.Marking && tyre.Marking !== "NaN" && (
+            <div className="flex items-center justify-center ml-2">
+              <span className="text-sm text-gray-600 text-center ">
+                {tyre.Marking}
+              </span>
+            </div>
+          )}
         </p>
 
-       
+
 
         {
           tyre.RunFlat === "YES" &&
@@ -602,7 +603,7 @@ export default function HomePage() {
                       logo: tyre.brand_logo_url,
                       image: tyre.image_url,
                       price: selectedOption.price,
-                      "In Stock":tyre["In Stock"],
+                      "In Stock": tyre["In Stock"],
                       "Price for 1": tyre["Price for 1"],
                       "Price for 2": tyre["Price for 2"],
                       "Price for 3": tyre["Price for 3"],
