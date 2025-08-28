@@ -833,10 +833,10 @@ export default function HomePage() {
               {/* typewritter */}
 
               <div className="mb-6 min-h-[4rem] sm:min-h-[3rem]">
-                <h1 className="text-3xl sm:text-5xl text-white font-bold drop-shadow-lg mt-10">
+                <h1 className="text-3xl sm:text-5xl text-white font-bold drop-shadow-lg mt-8">
                   Your Local Mobile<span className='text-red-500'> Tyre Experts</span>
                 </h1>
-                <div className="text-white text-xl mt-10">
+                <div className="text-white text-xl mt-8">
                   <p>
                     We provide premium tyre services across Melbourne’s south-eastern suburbs.
                   </p>
