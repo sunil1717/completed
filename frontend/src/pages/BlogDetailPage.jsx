@@ -4,6 +4,7 @@ import axios from "../utils/axiosInstance";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet";
 
 const BlogDetailPage = () => {
   const { slug } = useParams();
@@ -39,6 +40,14 @@ const BlogDetailPage = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{blog.metaTitle || blog.title}</title>
+        <meta
+          name="description"
+          content={blog.metaDescription || blog.description?.slice(0, 150)}
+        />
+      </Helmet>
+
       <Navbar />
 
       {/* Hero Section */}

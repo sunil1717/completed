@@ -5,7 +5,9 @@ const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   image: String,
-  slug: { type: String, unique: true }, //  slug field
+  slug: { type: String, unique: true },
+  metaTitle: { type: String },         
+  metaDescription: { type: String },
   createdAt: {
     type: Date,
     default: Date.now,

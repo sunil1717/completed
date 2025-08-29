@@ -8,7 +8,7 @@ exports.upload = upload.single('image');
 
 exports.addBlog = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, metaTitle, metaDescription } = req.body;
 
     if (!title || !description) {
       return res.status(400).json({ error: 'Title and content are required' });
@@ -29,7 +29,10 @@ exports.addBlog = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    const blog = new Blog({ title, description, image: imageUrl });
+    const blog = new Blog({
+      title, description, image: imageUrl, metaTitle,
+      metaDescription
+    });
     await blog.save();
     res.status(201).json({ message: 'Blog added successfully', data: blog });
   } catch (err) {

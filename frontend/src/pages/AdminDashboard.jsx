@@ -70,6 +70,8 @@ export default function AdminDashboard() {
   const [newBlog, setNewBlog] = useState({
     title: '',
     description: '',
+    metaTitle:'',
+    metaDescription:'',
     image: null,
   });
   const [blogImagePreview, setBlogImagePreview] = useState(null);
@@ -238,6 +240,7 @@ export default function AdminDashboard() {
         category: ''
       });
       setImagePreview(null);
+      setBrandLogoPreview(null);
     } catch (err) {
       console.error("Failed to add tyre:", err);
       alert("Something went wrong!");
@@ -359,8 +362,8 @@ export default function AdminDashboard() {
 
   const handleAddBlog = async () => {
     setLoading(true);
-    const { title, description, image } = newBlog;
-    if (!title || !description || !image) {
+    const { title, description,metaTitle,metaDescription, image } = newBlog;
+    if (!title || !description || !image || !metaTitle || !metaDescription) {
       alert('All fields are required');
       return;
     }
@@ -369,11 +372,16 @@ export default function AdminDashboard() {
     formData.append('title', title);
     formData.append('description', description);
     formData.append('image', image);
+    formData.append('metaTitle',metaTitle);
+    formData.append('metaDescription',metaDescription);
+
+    
+
 
     try {
       await addBlog(formData);
       setSuccessMessage("Blog added successfully");
-      setNewBlog({ title: '', description: '', image: null });
+      setNewBlog({ title: '', description: '',metaTitle :'',  metaDescription :'', image: null });
       setBlogImagePreview(null);
     } catch (err) {
       alert('Failed to add blog');
@@ -1154,6 +1162,23 @@ export default function AdminDashboard() {
                 onChange={(e) => setNewBlog({ ...newBlog, description: e.target.value })}
                 className="border px-2 py-2 rounded text-sm"
               />
+              {/*  Meta Title */}
+              <input
+                type="text"
+                placeholder="Meta Title"
+                value={newBlog.metaTitle || ""}
+                onChange={(e) => setNewBlog({ ...newBlog, metaTitle: e.target.value })}
+                className="border px-2 py-2 rounded text-sm"
+              />
+
+              {/*  Meta Description */}
+              <textarea
+                placeholder="Meta Description"
+                value={newBlog.metaDescription || ""}
+                onChange={(e) => setNewBlog({ ...newBlog, metaDescription: e.target.value })}
+                className="border px-2 py-2 rounded text-sm"
+              />
+
               <input
                 type="file"
                 accept="image/*"
@@ -1305,8 +1330,8 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setStatusFilter("delivered")}
                 className={`px-4 py-2 rounded-lg font-semibold ${statusFilter === "delivered"
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200"
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-200"
                   }`}
               >
                 Delivered
