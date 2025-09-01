@@ -558,7 +558,7 @@ export default function HomePage() {
                     <div className="flex items-center  gap-1">
                       {isAvailable && (<input
                         type="radio"
-                        name={`price-option-home-${tyreKey}`}
+                        name={`price-option-home-${tyreKey}-${tyre.RunFlat}`}
                         value={option.qty}
                         checked={selectedPriceOption[tyreKey] === option.qty}
                         onChange={() =>
