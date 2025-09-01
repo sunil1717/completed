@@ -111,6 +111,7 @@ const ProductSingle = () => {
         brand: tyre.Brand,
         model: tyre.Model,
         rating: tyre["LOAD/SPEED RATING"],
+        RunFlat:tyre.RunFlat,
         logo: tyre.brand_logo_url,
         image: tyre.image_url,
         price,

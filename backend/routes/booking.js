@@ -74,7 +74,7 @@ router.post("/confirm", async (req, res) => {
           ${cart
           .map(
             (item) =>
-              `<li>${item.brand}-${item.model} (${item.width} /${item.profile}R${item.rimSize}) - Qty: ${item.quantity
+              `<li>${item.brand}-${item.model} -RunFlat:${item.RunFlat} (${item.width} /${item.profile}R${item.rimSize}) - Qty: ${item.quantity
               } - $${item.price * item.quantity}</li>`
           )
           .join("")}
@@ -123,7 +123,7 @@ router.post("/confirm", async (req, res) => {
           ${cart
           .map(
             (item) =>
-              `<li>${item.brand} ${item.model} (${item.width}/${item.profile}R${item.rimSize}) - Qty: ${item.quantity
+              `<li>${item.brand} ${item.model} -RunFlat:${item.RunFlat} (${item.width}/${item.profile}R${item.rimSize}) - Qty: ${item.quantity
               } - $${item.price * item.quantity}</li>`
           )
           .join("")}
