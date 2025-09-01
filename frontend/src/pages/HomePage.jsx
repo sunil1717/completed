@@ -1106,7 +1106,7 @@ export default function HomePage() {
 
 
         {/* Recommended Products */}
-        <div ref={resultsRef}>
+        <div ref={resultsRef} className='scroll-mt-[110px]'>
           {hasSearched && tyres.length > 0 && <RecommendedProducts tyres={tyres} />}
         </div>
 
