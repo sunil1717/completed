@@ -30,6 +30,11 @@ const bookingSchema = new mongoose.Schema(
         rimSize: String,
         quantity: Number,
         price: Number,
+        Type:String,
+        Marking:String,
+        rating:String,
+        RunFlat:String
+
       },
     ],
     selectedTyres: [String],
