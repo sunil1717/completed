@@ -74,7 +74,7 @@ router.post("/confirm", async (req, res) => {
           ${cart
           .map(
             (item) =>
-              `<li>${item.brand}-${item.model} -RunFlat:${item.RunFlat} (${item.width} /${item.profile}R${item.rimSize}) - Qty: ${item.quantity
+              `<li>${item.brand}-${item.model} - RunFlat:${item.RunFlat} - Type :${item.Type} - Marking :${item.Marking} (${item.width} /${item.profile}R${item.rimSize})${item.rating} - Qty: ${item.quantity
               } - $${item.price * item.quantity}</li>`
           )
           .join("")}
@@ -123,7 +123,7 @@ router.post("/confirm", async (req, res) => {
           ${cart
           .map(
             (item) =>
-              `<li>${item.brand} ${item.model} -RunFlat:${item.RunFlat} (${item.width}/${item.profile}R${item.rimSize}) - Qty: ${item.quantity
+              `<li>${item.brand} ${item.model} -RunFlat:${item.RunFlat}- Type :${item.Type} - Marking :${item.Marking}  (${item.width}/${item.profile}R${item.rimSize})${item.rating} - Qty: ${item.quantity
               } - $${item.price * item.quantity}</li>`
           )
           .join("")}
@@ -188,31 +188,31 @@ router.post("/confirm", async (req, res) => {
 
     } else {
 
-    // === NORMAL BOOKING HANDLING ===
-    let defaultAvailable = 0;
-    if (["morning", "lunch", "afternoon"].includes(selectedTime)) {
-      defaultAvailable = 3;
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid phase" });
+      // === NORMAL BOOKING HANDLING ===
+      let defaultAvailable = 0;
+      if (["morning", "lunch", "afternoon"].includes(selectedTime)) {
+        defaultAvailable = 3;
+      } else {
+        return res.status(400).json({ success: false, message: "Invalid phase" });
+      }
+
+      let slot = await BookingSlot.findOne({ date: selectedDate, phase: selectedTime });
+
+      if (!slot) {
+        slot = new BookingSlot({
+          date: selectedDate,
+          phase: selectedTime,
+          availableSlots: defaultAvailable - 1, // create with 2 left
+        });
+        await slot.save();
+      } else if (slot.availableSlots > 0) {
+        slot.availableSlots -= 1;
+        await slot.save();
+      } else {
+        return res.status(400).json({ success: false, message: "Slot is fully booked" });
+      }
     }
 
-    let slot = await BookingSlot.findOne({ date: selectedDate, phase: selectedTime });
-
-    if (!slot) {
-      slot = new BookingSlot({
-        date: selectedDate,
-        phase: selectedTime,
-        availableSlots: defaultAvailable - 1, // create with 2 left
-      });
-      await slot.save();
-    } else if (slot.availableSlots > 0) {
-      slot.availableSlots -= 1;
-      await slot.save();
-    } else {
-      return res.status(400).json({ success: false, message: "Slot is fully booked" });
-    }
-  }
-  
 
 
 
@@ -259,11 +259,26 @@ router.post("/confirm", async (req, res) => {
         // Force quantity into a number
         const orderedQty = Number(item.quantity);
 
-        const tyre = await Tyreall.findOne({
+        // Build query dynamically
+        const query = {
           Brand: item.brand,
           Model: item.model,
-          SIZE: `${item.width}/${item.profile}R${item.rimSize}`, // adjust if SIZE format differs
-        });
+          SIZE: `${item.width}/${item.profile}R${item.rimSize}`
+        };
+
+        // Helper: only add if value is not null/undefined/NaN/empty
+        const addIfValid = (key, value) => {
+          if (value !== null && value !== undefined && value !== "" && value !== "NaN" && !Number.isNaN(value)) {
+            query[key] = value;
+          }
+        };
+
+        addIfValid("Type", item.Type);
+        addIfValid("RunFlat", item.RunFlat);
+        addIfValid("LOAD/SPEED RATING", item.rating);
+        addIfValid("Marking", item.Marking);
+
+        const tyre = await Tyreall.findOne(query);
 
         if (tyre) {
           const currentStock = parseInt(tyre["In Stock"], 10) || 0;
@@ -290,7 +305,7 @@ router.post("/confirm", async (req, res) => {
       success: true,
       message: `Slot booked for ${selectedDate} (${selectedTime})`,
       booking: newBooking,
-      
+
     });
 
 

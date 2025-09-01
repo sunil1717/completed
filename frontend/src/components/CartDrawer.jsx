@@ -127,9 +127,28 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     <p className="text-lg font-semibold text-gray-800">
                       {item.model}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      {item.width}/{item.profile}R{item.rimSize} ( {item.rating} )
+                    {
+                      item.RunFlat === "YES" &&
+                      (<div className="flex flex-cols mb-1">
+                        <img className='h-5 w-5' src="/runflat.svg" alt="Runflat" />
+                        <span className='text-black font-medium text-center ml-1 '>Runflat</span>
+                      </div>
+
+                      )
+
+                    }
+                    <p className="text-sm text-gray-500 flex flex-row">
+                      <span>{item.width}/{item.profile}R{item.rimSize} ( {item.rating} )</span>
+
+                      {item.Marking && item.Marking !== "NaN" && (
+                        <div className="flex items-center justify-center ml-2">
+                          <span className="text-sm text-gray-600 text-center ">
+                            {item.Marking}
+                          </span>
+                        </div>
+                      )}
                     </p>
+
                     <p className="text-sm text-gray-500">
                       ${(item.price).toFixed(2)} x {item.quantity}
                     </p>
@@ -236,8 +255,26 @@ const CartDrawer = ({ isOpen, onClose }) => {
                       <p className="text-lg font-semibold text-gray-800">
                         {item.model}
                       </p>
-                      <p className="text-sm text-gray-500">
-                        {item.width}/{item.profile}R{item.rimSize} ( {item.rating} )
+                      {
+                        item.RunFlat === "YES" &&
+                        (<div className="flex flex-cols mb-1">
+                          <img className='h-5 w-5' src="/runflat.svg" alt="Runflat" />
+                          <span className='text-black font-medium text-center ml-1 '>Runflat</span>
+                        </div>
+
+                        )
+
+                      }
+                      <p className="text-sm text-gray-500 flex flex-row">
+                        <span>{item.width}/{item.profile}R{item.rimSize} ( {item.rating} )</span>
+
+                        {item.Marking && item.Marking !== "NaN" && (
+                          <div className="flex items-center justify-center ml-2">
+                            <span className="text-sm text-gray-600 text-center ">
+                              {item.Marking}
+                            </span>
+                          </div>
+                        )}
                       </p>
                       <p className="text-sm text-gray-500">
                         ${(item.price).toFixed(2)} x {item.quantity}

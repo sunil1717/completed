@@ -175,7 +175,11 @@ export const useShopStore = create((set, get) => ({
         item.profile === tyre.profile &&
         item.rimSize === tyre.rimSize &&
         item.brand === tyre.brand &&
-        item.model === tyre.model
+        item.model === tyre.model &&
+        item.rating===tyre.rating &&
+        item.Marking===tyre.Marking &&
+        item.Type===tyre.Type && 
+        item.RunFlat===tyre.RunFlat
     );
 
     if (existingIndex !== -1) {

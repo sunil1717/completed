@@ -13,9 +13,14 @@ const RecommendedProducts = ({ tyres }) => {
 
 
 
-  const getTyreKey = (tyre) => {
+ const getTyreKey = (tyre) => {
     const size = tyre.SIZE || `${tyre?.width}/${tyre?.profile}R${tyre?.rimSize}`;
-    return `${tyre?.brand || tyre?.Brand}-${tyre?.model || tyre?.Model}-${size}`;
+    const rating=tyre["LOAD/SPEED RATING"] || tyre.rating;
+    const Marking=tyre.Marking;
+    const RunFlat=tyre.RunFlat;
+    const Type=tyre.Type;
+
+    return `${tyre?.brand || tyre?.Brand}-${tyre?.model || tyre?.Model}-${size}-${rating}-${Marking}-${Type}-${RunFlat}`;
   };
 
 
@@ -105,7 +110,9 @@ const RecommendedProducts = ({ tyres }) => {
       brand: tyre.Brand,
       model: tyre.Model,
       rating: tyre["LOAD/SPEED RATING"],
+      Type: tyre.Type,
       RunFlat:tyre.RunFlat,
+      Marking: tyre.Marking,
       logo: tyre.brand_logo_url,
       image: tyre.image_url,
       price: price,

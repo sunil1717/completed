@@ -51,11 +51,11 @@ export default function DateTimePicker() {
 
   // Optional: Set initial selectedDate if not set
   useEffect(() => {
-    if (!selectedDate) {
-      const firstDate = getWeekDates()[0].full;
-      setSelectedDate(firstDate);
+  
+      
+      setSelectedDate(null);
       setSelectedTime(null);
-    }
+    
   }, []);
 
   return (
