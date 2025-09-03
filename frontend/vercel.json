@@ -1,12 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
       "source": "/sitemap.xml",
-      "destination": "/api"
+      "destination": "https://your-backend.vercel.app/sitemap.xml"
     },
     {
       "source": "/(.*)",
@@ -14,3 +10,4 @@
     }
   ]
 }
+
