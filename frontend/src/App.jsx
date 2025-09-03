@@ -69,7 +69,7 @@ export default function App() {
       {/* <Route path="/login/user" element={<LoginPage />} /> */}
       <Route path="/login/admin" element={<AdminLogin />} />
       
-      <Route path="*" element={<HomePage/>} />
+      
       <Route path="/blogs" element={<AllBlogs />} />
        <Route path="/blog/:slug" element={<BlogDetailPage />} />
       <Route path="/terms" element={<TearmCondition/>} />
