@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 const SuburbPage = () => {
     const { suburb } = useParams(); 
-    const suburbName = suburb.charAt(0).toUpperCase() + suburb.slice(1);
+    const suburbName = suburb.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()); 
 
     return (
         <>

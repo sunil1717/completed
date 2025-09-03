@@ -3,6 +3,12 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
+
+
+const Blog =require('./models/Blog')
+const Tyreall =require('./models/Tyreall')
+const ServiceArea =require('./models/ServiceArea')
+
 // Load environment variables
 dotenv.config();
 
@@ -55,6 +61,71 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/booking', bookingRoutes);
 app.use('/api/slots', bookingSlotRoutes);
 app.use('/api/booking-backend', bookingBackendDbRoutes);
+
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const baseUrl = "https://completed-i8yo.vercel.app";
+
+    // 1️ Static URLs
+    const staticUrls = [
+      '/',
+      '/shipping',
+      '/checkout',
+      '/order',
+      '/login/admin',
+      '/blogs',
+      '/terms',
+      '/privacy',
+      '/about-us',
+      '/services',
+      '/area-we-serve',
+      '/services/fleet',
+      '/services/tyre-sales',
+      '/services/onsite-fitting',
+      '/services/puncture-repair',
+      '/services/rotations',
+      '/services/wheel-balancing',
+      '/services/inspections',
+      '/services/recycling'
+
+
+
+ ];
+
+    // 2️ Blog URLs
+    const blogs = await Blog.find({}).lean();
+    const blogUrls = blogs.map(blog => `/blog/${blog.slug}`);
+
+    // 3️ Tyre URLs (assuming you store slug in Tyre collection)
+    const tyres = await Tyreall.find({}).lean();
+    const tyreUrls = tyres.map(tyre => `/product/${tyre.slug}`);
+
+    // 4️ Suburb URLs (using suburb name only)
+    const suburbs = await ServiceArea.find({}).lean();
+    const suburbUrls = suburbs.map(s => {
+      const slug = s.suburb.toLowerCase().replace(/\s+/g, '-');
+      return `/area-we-serve/${slug}`;
+    });
+
+    // === Build XML ===
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    sitemap += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    [...staticUrls, ...blogUrls, ...tyreUrls, ...suburbUrls].forEach(url => {
+      sitemap += `  <url><loc>${baseUrl}${url}</loc></url>\n`;
+    });
+
+    sitemap += '</urlset>';
+
+    res.header('Content-Type', 'application/xml');
+    res.send(sitemap);
+
+  } catch (err) {
+    console.error("Sitemap error:", err);
+    res.status(500).send('Failed to generate sitemap');
+  }
+});
 
 
 // 🧠 Local development only

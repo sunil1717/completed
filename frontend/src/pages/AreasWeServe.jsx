@@ -199,7 +199,7 @@ const AreasWeServe = () => {
               {suburbs.map((suburb, idx) => (
                 <li key={idx}>
                   <Link
-                    to={`/area-we-serve/${encodeURIComponent(suburb)}`}
+                    to={`/area-we-serve/${suburb.replace(/\s+/g, "-").toLowerCase()}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block px-4 py-2 rounded-lg cursor-pointer transition bg-gray-100 hover:bg-blue-100"
