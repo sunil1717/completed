@@ -2,7 +2,15 @@
 const BookingSlot = require("../models/BookingSlot");
 
 
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
 
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const ADELAIDE_TZ = "Australia/Adelaide";
 
 
 
@@ -106,6 +114,12 @@ const checkAvailability = async (req, res) => {
       return res.status(400).json({ success: false, message: "Date is required" });
     }
 
+
+
+    const now = dayjs().tz(ADELAIDE_TZ);
+    const selected = dayjs(date).tz(ADELAIDE_TZ);
+
+
     // Fetch all slots already created for that date
     const slots = await BookingSlot.find({ date });
 
@@ -119,6 +133,54 @@ const checkAvailability = async (req, res) => {
       }
     });
 
+
+    // === AUTO CUTOFF RULES ===
+    if (selected.isSame(now, "day")) {
+      // Morning always disabled today
+      await BookingSlot.updateOne(
+        { date, phase: "morning" },
+        { $set: { availableSlots: 0 } },
+        { upsert: true }
+      );
+      availability.morning = 0;
+
+      // Lunch disabled after 8AM
+      if (now.hour() >= 8) {
+        await BookingSlot.updateOne(
+          { date, phase: "lunch" },
+          { $set: { availableSlots: 0 } },
+          { upsert: true }
+        );
+        availability.lunch = 0;
+      }
+
+      // Afternoon disabled after 11AM
+      if (now.hour() >= 11) {
+        await BookingSlot.updateOne(
+          { date, phase: "afternoon" },
+          { $set: { availableSlots: 0 } },
+          { upsert: true }
+        );
+        availability.afternoon = 0;
+      }
+    }
+
+    // Tomorrow morning disabled if it's after 9PM today
+    if (selected.isSame(now.add(1, "day"), "day") && now.hour() >= 21) {
+      await BookingSlot.updateOne(
+        { date, phase: "morning" },
+        { $set: { availableSlots: 0 } },
+        { upsert: true }
+      );
+      availability.morning = 0;
+    }
+
+    // // Flexible = sum of others
+    // availability.flexible =
+    //   availability.morning + availability.lunch + availability.afternoon;
+
+   
+
     // Calculate flexible dynamically
     availability["flexible"] =
       availability.morning + availability.lunch + availability.afternoon;
@@ -128,6 +190,8 @@ const checkAvailability = async (req, res) => {
       date,
       availability,
     });
+
+    
   } catch (error) {
     console.error("Error checking availability:", error);
     res.status(500).json({ success: false, message: "Server error" });

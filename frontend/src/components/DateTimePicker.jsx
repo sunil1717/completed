@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import axios from "../utils/axiosInstance";
 import { useShopStore } from "../store/shopStore";
 
+// Extend dayjs with necessary plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const ADELAIDE_TZ = "Australia/Adelaide";
+
 export default function DateTimePicker() {
   const { selectedDate, setSelectedDate, selectedTime, setSelectedTime } = useShopStore();
-  const today = dayjs().startOf("day");
+  const today = dayjs().tz(ADELAIDE_TZ).startOf("day");
 
   const [weekStart, setWeekStart] = useState(today);
   const [availability, setAvailability] = useState(null);
@@ -42,32 +50,25 @@ export default function DateTimePicker() {
     }
   };
 
-  // Fetch availability when component mounts or selectedDate changes
   useEffect(() => {
     if (selectedDate) {
       fetchAvailability(selectedDate);
     }
   }, [selectedDate]);
 
-  // Optional: Set initial selectedDate if not set
   useEffect(() => {
-  
-      
-      setSelectedDate(null);
-      setSelectedTime(null);
-    
+    setSelectedDate(null);
+    setSelectedTime(null);
   }, []);
 
   return (
     <div className="max-w-lg mx-auto p-4">
-      {/* Calendar */}
       <h2 className="text-lg font-semibold mb-2">Select a fitting date:</h2>
       <div className="flex items-center justify-between mb-2">
         <button
           onClick={() => setWeekStart(weekStart.subtract(7, "day"))}
-          className={`text-sm font-medium ${
-            weekStart.isSame(today, "week") ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`text-sm font-medium ${weekStart.isSame(today, "week") ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           disabled={weekStart.isSame(today, "week")}
         >
           &lt; Prev week
@@ -82,26 +83,38 @@ export default function DateTimePicker() {
 
       <div className="grid grid-cols-7 gap-2">
         {getWeekDates().map((d) => {
-          const isToday = dayjs(d.full).isSame(today, "day");
-          const isPast = dayjs(d.full).isBefore(today, "day");
+          const date = dayjs(d.full).tz(ADELAIDE_TZ);
+          const isToday = date.isSame(today, "day");
+          const isPast = date.isBefore(today, "day");
+
           const todayDay = today.day();
+          const now = dayjs().tz(ADELAIDE_TZ);
 
           let shouldDisable = false;
 
+          // === Friday Logic ===
           if (todayDay === 5) {
-            shouldDisable =
-              dayjs(d.full).isSame(today.add(1, "day"), "day") ||
-              dayjs(d.full).isSame(today.add(2, "day"), "day");
+            if (now.hour() < 8) {
+              // Before 8AM → only Saturday disabled
+              shouldDisable = date.isSame(today.add(1, "day"), "day");
+            } else {
+              // After 8AM → Saturday & Sunday disabled
+              shouldDisable =
+                date.isSame(today.add(1, "day"), "day") ||
+                date.isSame(today.add(2, "day"), "day");
+            }
           }
 
+          // === Saturday Logic ===
           if (todayDay === 6) {
             shouldDisable =
-              dayjs(d.full).isSame(today, "day") ||
-              dayjs(d.full).isSame(today.add(1, "day"), "day");
+              date.isSame(today, "day") || // block Saturday itself
+              date.isSame(today.add(1, "day"), "day"); // block Sunday
           }
 
+          // === Sunday Logic ===
           if (todayDay === 0) {
-            shouldDisable = dayjs(d.full).isSame(today, "day");
+            shouldDisable = date.isSame(today, "day"); // block Sunday itself
           }
 
           if (isPast && !isToday) return null;
@@ -112,16 +125,14 @@ export default function DateTimePicker() {
               onClick={() => {
                 setSelectedDate(d.full);
                 setSelectedTime(null);
-                // No need to fetchAvailability here because useEffect will handle it
               }}
               disabled={shouldDisable}
-              className={`p-2 rounded-md border text-center ${
-                selectedDate === d.full
-                  ? "bg-red-400 border-red-500"
-                  : shouldDisable
+              className={`p-2 rounded-md border text-center ${selectedDate === d.full
+                ? "bg-red-400 border-red-500"
+                : shouldDisable
                   ? "bg-gray-200 border-gray-300 cursor-not-allowed"
                   : "bg-white border-gray-300"
-              }`}
+                }`}
             >
               <div className="text-sm font-semibold">{d.day}</div>
               <div className="text-lg">{d.dateNum}</div>
@@ -131,7 +142,6 @@ export default function DateTimePicker() {
         })}
       </div>
 
-      {/* Time slots */}
       {selectedDate && (
         <>
           <h3 className="text-lg font-semibold mt-6 mb-2">Preferred service time:</h3>
@@ -141,55 +151,91 @@ export default function DateTimePicker() {
           ) : availability ? (
             <>
               <div className="grid grid-cols-3 gap-2">
-                {timeSlots.map((slot) => (
-                  <button
-                    key={slot.label}
-                    onClick={() => setSelectedTime(slot.label)}
-                    disabled={availability[slot.label] <= 0}
-                    className={`p-3 rounded-md border text-center ${
-                      selectedTime === slot.label
+                {timeSlots.map((slot) => {
+                  const now = dayjs().tz(ADELAIDE_TZ);
+                  const selected = dayjs(selectedDate).tz(ADELAIDE_TZ);
+                  const isTodaySelected = selected.isSame(now, "day");
+
+                  // let isClosedByTime = false;
+
+                  // if (isTodaySelected) {
+                  //   if (slot.label === "morning") {
+                  //     // Always disable today's morning slot
+                  //     isClosedByTime = true;
+                  //   } else if (slot.label === "lunch" && now.hour() >= 8) {
+                  //     isClosedByTime = true;
+                  //   } else if (slot.label === "afternoon" && now.hour() >= 11) {
+                  //     isClosedByTime = true;
+                  //   }
+                  // }
+
+                  // // === Tomorrow morning logic ===
+                  // if (
+                  //   slot.label === "morning" &&
+                  //   selected.isSame(now.add(1, "day"), "day") &&
+                  //   now.hour() >= 21
+                  // ) {
+                  //   isClosedByTime = true;
+                  // }
+
+                  const isDisabled = availability[slot.label] <= 0 ;
+
+                  return (
+                    <button
+                      key={slot.label}
+                      onClick={() => setSelectedTime(slot.label)}
+                      disabled={isDisabled}
+                      className={`p-3 rounded-md border text-center ${selectedTime === slot.label
                         ? "bg-red-400 border-red-500"
-                        : availability[slot.label] > 0
-                        ? "bg-white border-gray-300"
-                        : "bg-gray-200 border-gray-300 cursor-not-allowed"
-                    }`}
-                  >
-                    <div className="font-semibold">{slot.title}</div>
-                    <div className="text-sm">{slot.time}</div>
-                    <div
-                      className={`text-xs mt-1 ${
-                        availability[slot.label] === 1
-                          ? "text-red-500 font-bold"
-                          : "text-gray-500"
-                      }`}
+                        : !isDisabled
+                          ? "bg-white border-gray-300"
+                          : "bg-gray-200 border-gray-300 cursor-not-allowed"
+                        }`}
                     >
-                      {availability[slot.label]} slots left
-                    </div>
-                  </button>
-                ))}
+                      <div className="font-semibold">{slot.title}</div>
+                      <div className="text-sm">{slot.time}</div>
+                      {availability[slot.label] === 1 &&  (
+                        <div className="text-xs mt-1 text-red-500 font-bold">
+                          1 slot left
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Flexible option */}
-              <button
-                onClick={() => setSelectedTime("flexible")}
-                disabled={availability.flexible <= 0}
-                className={`mt-4 w-full p-3 rounded-md font-semibold ${
-                  selectedTime === "flexible"
-                    ? "bg-red-400 border-red-500"
-                    : availability.flexible > 0
-                    ? "bg-gray-200"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                I'm flexible{" "}
-                <span className="font-normal text-sm">
-                  (anytime 8am - 5pm){" "}
-                  <span className="bg-green-500 rounded-4xl">-$10 *</span>
-                </span>
-                <div className="text-xs mt-1 text-gray-600">
-                  {availability.flexible} slots left
-                </div>
-              </button>
+              {/* Flexible Option */}
+              {(() => {
+                const now = dayjs().tz(ADELAIDE_TZ);
+                const selected = dayjs(selectedDate).tz(ADELAIDE_TZ);
+                const isTodaySelected = selected.isSame(now, "day");
+                // const isFlexibleClosed = isTodaySelected && now.hour() >= 17;
+                const isFlexibleDisabled = availability.flexible <= 0 ;
+
+                return (
+                  <button
+                    onClick={() => setSelectedTime("flexible")}
+                    disabled={isFlexibleDisabled}
+                    className={`mt-4 w-full p-3 rounded-md font-semibold ${selectedTime === "flexible"
+                      ? "bg-red-400 border-red-500"
+                      : !isFlexibleDisabled
+                        ? "bg-gray-200"
+                        : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                  >
+                    I'm flexible{" "}
+                    <span className="font-normal text-sm">
+                      {" "}
+                      <span className="bg-green-500 rounded-4xl">-$10 *</span>
+                    </span>
+                    {availability.flexible === 1 && (
+                      <div className="text-xs mt-1 text-red-500 font-bold">
+                        1 slot left
+                      </div>
+                    )}
+                  </button>
+                );
+              })()}
             </>
           ) : (
             <p>No availability data.</p>
