@@ -116,8 +116,9 @@ const checkAvailability = async (req, res) => {
 
 
 
-    const now = dayjs().tz(ADELAIDE_TZ);
-    const selected = dayjs(date).tz(ADELAIDE_TZ);
+   const now = dayjs().tz(ADELAIDE_TZ);
+const selected = dayjs.tz(date, "YYYY-MM-DD", ADELAIDE_TZ);
+
 
 
     // Fetch all slots already created for that date

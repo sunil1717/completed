@@ -32,7 +32,7 @@ export default function DateTimePicker() {
         day: date.format("ddd"),
         dateNum: date.date(),
         month: date.format("MMM"),
-        full: date.format("YYYY-MM-DD"),
+        full: date.tz(ADELAIDE_TZ).format("YYYY-MM-DD"),
       };
     });
   };
@@ -83,7 +83,7 @@ export default function DateTimePicker() {
 
       <div className="grid grid-cols-7 gap-2">
         {getWeekDates().map((d) => {
-          const date = dayjs(d.full).tz(ADELAIDE_TZ);
+          const date = dayjs.tz(d.full, "YYYY-MM-DD", ADELAIDE_TZ);
           const isToday = date.isSame(today, "day");
           const isPast = date.isBefore(today, "day");
 
@@ -153,7 +153,7 @@ export default function DateTimePicker() {
               <div className="grid grid-cols-3 gap-2">
                 {timeSlots.map((slot) => {
                   const now = dayjs().tz(ADELAIDE_TZ);
-                  const selected = dayjs(selectedDate).tz(ADELAIDE_TZ);
+                  const selected =dayjs.tz(selectedDate, "YYYY-MM-DD", ADELAIDE_TZ);
                   const isTodaySelected = selected.isSame(now, "day");
 
                   // let isClosedByTime = false;
